@@ -1,0 +1,3 @@
+ccload http://eu.httpbin.org/get
+Response code: 200
+
