@@ -22,7 +22,7 @@ public class RequestBuilderTest extends TestCase {
         Assert.assertEquals(request.uri(), new URI(url));
     }
 
-    public void testRequestBuilderMalformedUrl() throws URISyntaxException {
+    public void testRequestBuilderMalformedUrl() {
         // given
         String url = "notaurl";
         // when
@@ -31,12 +31,4 @@ public class RequestBuilderTest extends TestCase {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::buildRequest);
         assertEquals("URI with undefined scheme", exception.getMessage());
     }
-
-
-//    Test
-//    void exceptionTesting() {
-//        Exception exception = assertThrows(ArithmeticException.class, () ->
-//                calculator.divide(1, 0));
-//        assertEquals("/ by zero", exception.getMessage());
-//    }
 }

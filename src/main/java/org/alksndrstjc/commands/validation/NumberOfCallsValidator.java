@@ -1,4 +1,4 @@
-package org.alksndrstjc.commands;
+package org.alksndrstjc.commands.validation;
 
 import com.beust.jcommander.IValueValidator;
 import com.beust.jcommander.ParameterException;
