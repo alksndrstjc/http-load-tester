@@ -1,6 +1,7 @@
 package org.alksndrstjc.commands;
 
 import com.beust.jcommander.Parameter;
+import org.alksndrstjc.commands.validation.NumberOfCallsValidator;
 import org.alksndrstjc.commands.validation.URLValidator;
 
 public class CLIParameters {
@@ -23,4 +24,12 @@ public class CLIParameters {
             validateValueWith = NumberOfCallsValidator.class
     )
     public Integer numberOfCalls;
+
+    @Parameter(
+            names = {"-c",},
+            description = "A number of threads to use.",
+            arity = 1,
+            validateValueWith = NumberOfCallsValidator.class
+    )
+    public Integer numberOfThreads;
 }
