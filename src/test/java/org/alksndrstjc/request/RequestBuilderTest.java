@@ -1,4 +1,4 @@
-package org.alksndrstjc.service;
+package org.alksndrstjc.request;
 
 import junit.framework.TestCase;
 import org.junit.Assert;

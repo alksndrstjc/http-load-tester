@@ -1,4 +1,4 @@
-package org.alksndrstjc.service;
+package org.alksndrstjc.request;
 
 import java.net.URI;
 import java.net.URISyntaxException;
