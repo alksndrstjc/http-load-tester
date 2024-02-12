@@ -1,25 +1,24 @@
 package org.alksndrstjc.request.concurrency;
 
+import org.alksndrstjc.model.ReportModel;
+
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RequestTask implements Runnable {
 
     private final HttpClient client;
     private final int numberOfRequests;
     private final HttpRequest request;
-    private final AtomicInteger counterGood;
-    private final AtomicInteger counterBad;
+    private final ReportModel report;
 
-    public RequestTask(HttpClient client, int numberOfRequests, HttpRequest request, AtomicInteger counterGood, AtomicInteger counterBad) {
+    public RequestTask(HttpClient client, int numberOfRequests, HttpRequest request, ReportModel report) {
         this.client = client;
         this.numberOfRequests = numberOfRequests;
         this.request = request;
-        this.counterGood = counterGood;
-        this.counterBad = counterBad;
+        this.report = report;
     }
 
     @Override
@@ -28,10 +27,10 @@ public class RequestTask implements Runnable {
             try {
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() != 500) {
-                    counterGood.incrementAndGet();
-                } else counterBad.incrementAndGet();
+                    report.getSuccessCounter().incrementAndGet();
+                } else report.getFailureCounter().incrementAndGet();
             } catch (IOException | InterruptedException e) {
-                counterBad.incrementAndGet();
+                report.getFailureCounter().incrementAndGet();
             }
         }
     }

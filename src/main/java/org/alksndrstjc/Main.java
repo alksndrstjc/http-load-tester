@@ -33,8 +33,8 @@ public class Main {
                 RequestHandler handler = new RequestHandler(executor, HttpClient.newBuilder().build());
                 handler.handleRequest(
                         new RequestBuilder(params.url).buildRequest(),
+                        params.numberOfCalls,
                         params.numberOfThreads,
-                        params.numberOfCalls / params.numberOfThreads,
                         reportModel
                 );
             }
