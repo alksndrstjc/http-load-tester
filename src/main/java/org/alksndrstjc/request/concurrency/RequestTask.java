@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RequestTask implements Runnable {
 
@@ -22,11 +24,18 @@ public class RequestTask implements Runnable {
     private final HttpRequest request;
     private final ReportModel report;
 
-    public RequestTask(HttpClient client, int numberOfRequests, HttpRequest request, ReportModel report) {
+    private final AtomicInteger requestCounter;
+    private final AtomicBoolean terminateRequestPerMinute;
+
+    public RequestTask(HttpClient client, int numberOfRequests, HttpRequest request, ReportModel report,
+                       AtomicInteger requestCounter,
+                       AtomicBoolean terminateRequestPerMinute) {
         this.client = client;
         this.numberOfRequests = numberOfRequests;
         this.request = request;
         this.report = report;
+        this.requestCounter = requestCounter;
+        this.terminateRequestPerMinute = terminateRequestPerMinute;
     }
 
     @Override
@@ -37,6 +46,8 @@ public class RequestTask implements Runnable {
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 long endTime = System.currentTimeMillis();
                 long totalTime = endTime - startTime;
+
+                requestCounter.incrementAndGet();
 
                 HttpHeaders headers = response.headers();
                 List<String> dateHeaderValues = headers.allValues("Date");
@@ -61,8 +72,16 @@ public class RequestTask implements Runnable {
                 if (response.statusCode() != 500) {
                     report.getSuccessCounter().incrementAndGet();
                 } else report.getFailureCounter().incrementAndGet();
+
+                if (report.getFailureCounter().get() + report.getSuccessCounter().get() == numberOfRequests) {
+                    terminateRequestPerMinute.set(true);
+                }
             } catch (IOException | InterruptedException e) {
                 report.getFailureCounter().incrementAndGet();
+
+                if (report.getFailureCounter().get() + report.getSuccessCounter().get() == numberOfRequests) {
+                    terminateRequestPerMinute.set(true);
+                }
             }
         }
     }
