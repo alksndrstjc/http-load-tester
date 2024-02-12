@@ -43,6 +43,8 @@ public class RequestTask implements Runnable {
                 long firstByteTime = 0;
                 long lastByteTime = 0;
 
+                //todo: using date header is imprecise if it doesn't include milliseconds
+                // rework using lower level libraries that actually read bytes
                 if (!dateHeaderValues.isEmpty()) {
                     Instant startInstant = Instant.ofEpochMilli(startTime);
                     Instant firstByteInstant = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(dateHeaderValues.getFirst()));
