@@ -1,5 +1,5 @@
 package org.alksndrstjc.model;
 
-public record RequestStats(double timeTaken, double timeToFirstByte, double timeToSecondByte) {
+public record RequestStats(double timeTaken, double timeToFirstByte, double timeToLastByte) {
 
 }

@@ -6,8 +6,6 @@ import org.alksndrstjc.request.concurrency.RequestTask;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RequestHandler {
 
@@ -20,9 +18,7 @@ public class RequestHandler {
         this.client = client;
     }
 
-    public void handleRequest(HttpRequest request, int numberOfRequests, int numberOfThreads, ReportModel report,
-                              AtomicInteger requestCounter,
-                              AtomicBoolean terminateRps) {
+    public void handleRequest(HttpRequest request, int numberOfRequests, int numberOfThreads, ReportModel report) {
         if (numberOfRequests < 0 || numberOfThreads < 0)
             throw new IllegalArgumentException("Negative numOfRequests or numOfThreads.");
 
@@ -34,40 +30,28 @@ public class RequestHandler {
             //check if all requests can be processed in batches in fixed number of threads
             if (remainingRequests == 0) {
                 for (int i = 1; i <= numberOfRequests; i += batchSize) {
-                    submit(batchSize, request, report,
-                            requestCounter,
-                            terminateRps);
+                    submit(batchSize, request, report);
                 }
             } else {
                 // submit in batches until last thread
                 for (int i = 0; i < numberOfThreads - 1; i++) {
-                    submit(batchSize, request, report,
-                            requestCounter,
-                            terminateRps);
+                    submit(batchSize, request, report);
                 }
                 // reserve the last thread for remaining requests + batch size
-                submit(remainingRequests + batchSize, request, report,
-                        requestCounter,
-                        terminateRps);
+                submit(remainingRequests + batchSize, request, report);
             }
         } else {
             // check if there are requests which can be processed in a single thread
-            if (numberOfRequests != 0) submit(numberOfRequests, request, report,
-                    requestCounter,
-                    terminateRps);
+            if (numberOfRequests != 0) submit(numberOfRequests, request, report);
         }
     }
 
-    private void submit(int requestsNum, HttpRequest request, ReportModel report,
-                        AtomicInteger requestCounter,
-                        AtomicBoolean terminateRPS) {
+    private void submit(int requestsNum, HttpRequest request, ReportModel report) {
         executor.submit(new RequestTask(
                 client,
                 requestsNum,
                 request,
-                report,
-                requestCounter,
-                terminateRPS
+                report
         ));
     }
 }

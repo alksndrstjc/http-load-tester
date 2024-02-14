@@ -14,8 +14,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RequestTask implements Runnable {
 
@@ -24,18 +22,11 @@ public class RequestTask implements Runnable {
     private final HttpRequest request;
     private final ReportModel report;
 
-    private final AtomicInteger requestCounter;
-    private final AtomicBoolean terminateRequestPerMinute;
-
-    public RequestTask(HttpClient client, int numberOfRequests, HttpRequest request, ReportModel report,
-                       AtomicInteger requestCounter,
-                       AtomicBoolean terminateRequestPerMinute) {
+    public RequestTask(HttpClient client, int numberOfRequests, HttpRequest request, ReportModel report) {
         this.client = client;
         this.numberOfRequests = numberOfRequests;
         this.request = request;
         this.report = report;
-        this.requestCounter = requestCounter;
-        this.terminateRequestPerMinute = terminateRequestPerMinute;
     }
 
     @Override
@@ -47,7 +38,7 @@ public class RequestTask implements Runnable {
                 long endTime = System.currentTimeMillis();
                 long totalTime = endTime - startTime;
 
-                requestCounter.incrementAndGet();
+                SharedStatsRPS.REQUEST_COUNTER.incrementAndGet();
 
                 HttpHeaders headers = response.headers();
                 List<String> dateHeaderValues = headers.allValues("Date");
@@ -73,14 +64,12 @@ public class RequestTask implements Runnable {
                     report.getSuccessCounter().incrementAndGet();
                 } else report.getFailureCounter().incrementAndGet();
 
-                if (report.getFailureCounter().get() + report.getSuccessCounter().get() == numberOfRequests) {
-                    terminateRequestPerMinute.set(true);
-                }
             } catch (IOException | InterruptedException e) {
                 report.getFailureCounter().incrementAndGet();
 
+            } finally {
                 if (report.getFailureCounter().get() + report.getSuccessCounter().get() == numberOfRequests) {
-                    terminateRequestPerMinute.set(true);
+                    SharedStatsRPS.TERMINATE_RPS.set(true);
                 }
             }
         }
