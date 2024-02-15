@@ -3,6 +3,7 @@ package org.alksndrstjc.commands;
 import com.beust.jcommander.Parameter;
 import org.alksndrstjc.commands.validation.NumberOfCallsValidator;
 import org.alksndrstjc.commands.validation.URLValidator;
+import org.alksndrstjc.commands.validation.ValidTextFile;
 
 public class CLIParameters {
 
@@ -32,4 +33,13 @@ public class CLIParameters {
             validateValueWith = NumberOfCallsValidator.class
     )
     public Integer numberOfThreads;
+
+    @Parameter(
+            names = {"-f"},
+            description = "A file containing urls.",
+            arity = 1,
+            validateValueWith = ValidTextFile.class
+    )
+    public String fileName;
+
 }
