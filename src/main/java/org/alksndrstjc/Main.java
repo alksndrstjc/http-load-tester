@@ -9,7 +9,6 @@ import org.alksndrstjc.model.ReportModel;
 import org.alksndrstjc.request.RequestBuilder;
 import org.alksndrstjc.request.RequestHandler;
 import org.alksndrstjc.request.concurrency.ExecutorsServiceFactory;
-import org.alksndrstjc.request.concurrency.RPSThread;
 
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -31,16 +30,16 @@ public class Main {
             }
 
             // start request per second monitor thread
-            RPSThread rpsThread = new RPSThread();
-            rpsThread.start();
+//            RPSThread rpsThread = new RPSThread();
+//            rpsThread.start();
 
             // start concurrent execution of requests
-            ReportModel reportModel = new ReportModel();
+            ReportModel reportModel = new ReportModel(params.numberOfRequests);
             try (ExecutorService executor = new ExecutorsServiceFactory().createFixedThreadPool(params.numberOfThreads + 1)) {
                 RequestHandler handler = new RequestHandler(executor, HttpClient.newBuilder().build());
                 handler.handleRequest(
                         new RequestBuilder(params.url).buildRequest(),
-                        params.numberOfCalls,
+                        params.numberOfRequests,
                         params.numberOfThreads,
                         reportModel
                 );

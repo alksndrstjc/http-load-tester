@@ -38,7 +38,7 @@ public class RequestTask implements Runnable {
                 long endTime = System.currentTimeMillis();
                 long totalTime = endTime - startTime;
 
-                SharedStatsRPS.REQUEST_COUNTER.incrementAndGet();
+                SharedStatsRPS.requestTimestamps.put(endTime);
 
                 HttpHeaders headers = response.headers();
                 List<String> dateHeaderValues = headers.allValues("Date");
@@ -68,7 +68,7 @@ public class RequestTask implements Runnable {
                 report.getFailureCounter().incrementAndGet();
 
             } finally {
-                if (report.getFailureCounter().get() + report.getSuccessCounter().get() == numberOfRequests) {
+                if (report.getFailureCounter().get() + report.getSuccessCounter().get() == report.getTotalRequests()) {
                     SharedStatsRPS.TERMINATE_RPS.set(true);
                 }
             }

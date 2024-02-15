@@ -24,7 +24,7 @@ public class CLIParameters {
             arity = 1,
             validateValueWith = NumberOfCallsValidator.class
     )
-    public Integer numberOfCalls;
+    public Integer numberOfRequests;
 
     @Parameter(
             names = {"-c",},

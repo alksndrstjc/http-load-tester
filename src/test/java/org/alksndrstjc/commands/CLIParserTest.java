@@ -24,7 +24,7 @@ public class CLIParserTest extends TestCase {
         commander.parse(args);
 
         assertEquals(parameters.url, "http://localhost:8080/endpoint");
-        assertEquals(parameters.numberOfCalls, Integer.valueOf(10));
+        assertEquals(parameters.numberOfRequests, Integer.valueOf(10));
         assertEquals(parameters.numberOfThreads, Integer.valueOf(5));
     }
 
