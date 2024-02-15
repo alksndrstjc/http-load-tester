@@ -10,9 +10,13 @@ import org.alksndrstjc.request.RequestBuilder;
 import org.alksndrstjc.request.RequestHandler;
 import org.alksndrstjc.request.concurrency.ExecutorsServiceFactory;
 import org.alksndrstjc.request.concurrency.RPSThread;
+import org.alksndrstjc.utils.TextFileReader;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class Main {
@@ -30,6 +34,15 @@ public class Main {
                 return;
             }
 
+            List<String> urls = new ArrayList<>();
+            if (params.fileName != null && !params.fileName.isEmpty()) {
+                urls = TextFileReader.parseUrlsFromFile(params.fileName);
+            }
+
+            if (params.url != null && !params.url.isEmpty()) {
+                urls.add(params.url);
+            }
+
             // start request per second monitor thread
             RPSThread rpsThread = new RPSThread();
             rpsThread.start();
@@ -38,18 +51,22 @@ public class Main {
             ReportModel reportModel = new ReportModel(params.numberOfRequests);
             try (ExecutorService executor = new ExecutorsServiceFactory().createFixedThreadPool(params.numberOfThreads + 1)) {
                 RequestHandler handler = new RequestHandler(executor, HttpClient.newBuilder().build());
-                handler.handleRequest(
-                        new RequestBuilder(params.url).buildRequest(),
-                        params.numberOfRequests,
-                        params.numberOfThreads,
-                        reportModel
-                );
+                for (String url : urls) {
+                    handler.handleRequest(
+                            new RequestBuilder(url).buildRequest(),
+                            params.numberOfRequests,
+                            params.numberOfThreads,
+                            reportModel
+                    );
+                }
             }
 
             // print out report
-            System.out.println(FinalReportModel.init(reportModel));
+            for (String url : urls) {
+                System.out.println(FinalReportModel.init(url, reportModel));
+            }
 
-        } catch (ParameterException | URISyntaxException ex) {
+        } catch (ParameterException | URISyntaxException | IllegalArgumentException | IOException ex) {
             System.err.println(ex.getMessage());
             jc.usage();
         }

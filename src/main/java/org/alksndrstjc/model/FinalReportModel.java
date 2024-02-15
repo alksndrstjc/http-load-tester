@@ -7,6 +7,7 @@ import static org.alksndrstjc.model.RequestStatsThreadSafe.*;
 
 @Builder
 public class FinalReportModel {
+    private String requestUrl;
     private int successfulRequests;
     private int failedRequests;
     private double rps;
@@ -20,26 +21,28 @@ public class FinalReportModel {
     private double ttlbMax;
     private double ttlbAvrg;
 
-    public static FinalReportModel init(ReportModel successCountReport) {
+    public static FinalReportModel init(String requestUrl, ReportModel successCountReport) {
         return FinalReportModel.builder()
-                .successfulRequests(successCountReport.getSuccessCounter().get())
-                .failedRequests(successCountReport.getFailureCounter().get())
+                .requestUrl(requestUrl)
+                .successfulRequests(successCountReport.getPerUrlSuccessCounter().get(requestUrl).get())
+                .failedRequests(successCountReport.getPerUrlFailureCounter().get(requestUrl).get())
                 .rps(SharedStatsRPS.latestRps)
-                .totalRequestTimeMin(getRequestedItemMin(RequestedItem.TOTAL_TIME).getAsDouble())
-                .totalRequestTimeMax(getRequestedItemMax(RequestedItem.TOTAL_TIME).getAsDouble())
-                .totalRequestTimeAvrg(getRequestedItemAvrg(RequestedItem.TOTAL_TIME).getAsDouble())
-                .ttfbMin(getRequestedItemMin(RequestedItem.TTFB).getAsDouble())
-                .ttfbMax(getRequestedItemMax(RequestedItem.TTFB).getAsDouble())
-                .ttfbAvrg(getRequestedItemAvrg(RequestedItem.TTFB).getAsDouble())
-                .ttlbMin(getRequestedItemMin(RequestedItem.TTLB).getAsDouble())
-                .ttlbMax(getRequestedItemMax(RequestedItem.TTLB).getAsDouble())
-                .ttlbAvrg(getRequestedItemAvrg(RequestedItem.TTLB).getAsDouble())
+                .totalRequestTimeMin(getRequestedItemMin(requestUrl, RequestedItem.TOTAL_TIME).getAsDouble())
+                .totalRequestTimeMax(getRequestedItemMax(requestUrl, RequestedItem.TOTAL_TIME).getAsDouble())
+                .totalRequestTimeAvrg(getRequestedItemAvrg(requestUrl, RequestedItem.TOTAL_TIME).getAsDouble())
+                .ttfbMin(getRequestedItemMin(requestUrl, RequestedItem.TTFB).getAsDouble())
+                .ttfbMax(getRequestedItemMax(requestUrl, RequestedItem.TTFB).getAsDouble())
+                .ttfbAvrg(getRequestedItemAvrg(requestUrl, RequestedItem.TTFB).getAsDouble())
+                .ttlbMin(getRequestedItemMin(requestUrl, RequestedItem.TTLB).getAsDouble())
+                .ttlbMax(getRequestedItemMax(requestUrl, RequestedItem.TTLB).getAsDouble())
+                .ttlbAvrg(getRequestedItemAvrg(requestUrl, RequestedItem.TTLB).getAsDouble())
                 .build();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Results:\n");
+        sb.append("Request url: " + requestUrl + "\n");
         sb.append(String.format(" Total Requests  (2XX)...................: %d\n", successfulRequests));
         sb.append(String.format(" Failed Requests (5XX)...................: %d\n", failedRequests));
         sb.append(String.format(" Request/second..........................: %.2f\n\n", rps));

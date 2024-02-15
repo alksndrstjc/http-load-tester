@@ -2,7 +2,9 @@ package org.alksndrstjc.commands;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
+import lombok.Getter;
 
+@Getter
 public class CLIParser {
 
     private final CLIParameters parameters = new CLIParameters();
@@ -21,9 +23,5 @@ public class CLIParser {
         return JCommander.newBuilder()
                 .addObject(parameters)
                 .build();
-    }
-
-    public CLIParameters getParameters() {
-        return parameters;
     }
 }

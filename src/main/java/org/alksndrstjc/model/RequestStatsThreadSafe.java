@@ -1,46 +1,45 @@
 package org.alksndrstjc.model;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+
+import static org.alksndrstjc.model.RequestedItemRuleMap.ruleMap;
 
 public class RequestStatsThreadSafe {
 
-    private static final Map<RequestedItem, Function<? super RequestStats, ? super Double>> ruleMap;
+    private static final Map<String, List<RequestStats>> perRequestStats = new ConcurrentHashMap<>();
 
-    static {
-        ruleMap = new HashMap<>();
-        ruleMap.put(RequestedItem.TOTAL_TIME, RequestStats::timeTaken);
-        ruleMap.put(RequestedItem.TTFB, RequestStats::timeToFirstByte);
-        ruleMap.put(RequestedItem.TTLB, RequestStats::timeToLastByte);
-    }
-
-    private static final List<RequestStats> stats = Collections.synchronizedList(new ArrayList<>());
-
-    public static void addStats(RequestStats statsModel) {
-        synchronized (stats) {
-            stats.add(statsModel);
+    public static void addStats(String request, RequestStats stats) {
+        perRequestStats.computeIfAbsent(request, k -> Collections.synchronizedList(new ArrayList<>()));
+        List<RequestStats> requestStats = perRequestStats.get(request);
+        synchronized (requestStats) {
+            requestStats.add(stats);
         }
     }
 
-    public static OptionalDouble getRequestedItemMin(RequestedItem requestedItem) {
+    public static OptionalDouble getRequestedItemMin(String request, RequestedItem requestedItem) {
         Function<? super RequestStats, ? super Double> function = ruleMap.get(requestedItem);
-        return stats.stream()
+        return perRequestStats.get(request)
+                .stream()
                 .map(function)
                 .mapToDouble(d -> (double) d)
                 .min();
     }
 
-    public static OptionalDouble getRequestedItemMax(RequestedItem requestedItem) {
+    public static OptionalDouble getRequestedItemMax(String request, RequestedItem requestedItem) {
         Function<? super RequestStats, ? super Double> function = ruleMap.get(requestedItem);
-        return stats.stream()
+        return perRequestStats.get(request)
+                .stream()
                 .map(function)
                 .mapToDouble(d -> (double) d)
                 .max();
     }
 
-    public static OptionalDouble getRequestedItemAvrg(RequestedItem requestedItem) {
+    public static OptionalDouble getRequestedItemAvrg(String request, RequestedItem requestedItem) {
         Function<? super RequestStats, ? super Double> function = ruleMap.get(requestedItem);
-        return stats.stream()
+        return perRequestStats.get(request)
+                .stream()
                 .map(function)
                 .mapToDouble(d -> (double) d)
                 .average();

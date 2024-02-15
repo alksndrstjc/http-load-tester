@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RequestTask implements Runnable {
 
@@ -31,6 +32,8 @@ public class RequestTask implements Runnable {
 
     @Override
     public void run() {
+        String url = request.uri().toString();
+
         for (int i = 0; i < numberOfRequests; i++) {
             try {
                 long startTime = System.currentTimeMillis();
@@ -55,20 +58,23 @@ public class RequestTask implements Runnable {
                     lastByteTime = Duration.between(firstByteInstant, endInstant).toMillis();
                 }
 
-                RequestStatsThreadSafe.addStats(new RequestStats(
+                RequestStatsThreadSafe.addStats(url, new RequestStats(
                         DecimalFormatter.format((double) totalTime / 1000),
                         DecimalFormatter.format((double) firstByteTime / 1000),
                         DecimalFormatter.format((double) lastByteTime / 1000)));
 
+                report.getPerUrlSuccessCounter().computeIfAbsent(url, k -> new AtomicInteger());
+                report.getPerUrlFailureCounter().computeIfAbsent(url, k -> new AtomicInteger());
+
                 if (response.statusCode() != 500) {
-                    report.getSuccessCounter().incrementAndGet();
-                } else report.getFailureCounter().incrementAndGet();
+                    report.getPerUrlSuccessCounter().get(url).incrementAndGet();
+                } else report.getPerUrlFailureCounter().get(url).incrementAndGet();
 
             } catch (IOException | InterruptedException e) {
-                report.getFailureCounter().incrementAndGet();
+                report.getPerUrlFailureCounter().get(url).incrementAndGet();
 
             } finally {
-                if (report.getFailureCounter().get() + report.getSuccessCounter().get() == report.getTotalRequests()) {
+                if (report.getPerUrlFailureCounter().get(url).get() + report.getPerUrlSuccessCounter().get(url).get() == report.getTotalRequests()) {
                     SharedStatsRPS.TERMINATE_RPS.set(true);
                 }
             }

@@ -1,0 +1,2 @@
+http://localhost:8080/endpoint1
+http://localhost:8080/endpoint2

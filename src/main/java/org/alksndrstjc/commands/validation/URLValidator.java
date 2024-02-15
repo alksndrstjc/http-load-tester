@@ -18,7 +18,7 @@ public class URLValidator implements IValueValidator<String> {
         }
     }
 
-    private boolean isValidUrl(String value) {
+    public static boolean isValidUrl(String value) {
         try {
             URI uri = new URI(value);
             String scheme = uri.getScheme();
