@@ -6,6 +6,7 @@ import org.alksndrstjc.commands.CLIParameters;
 import org.alksndrstjc.commands.CLIParser;
 import org.alksndrstjc.model.FinalReportModel;
 import org.alksndrstjc.model.ReportModel;
+import org.alksndrstjc.request.HttpMethod;
 import org.alksndrstjc.request.RequestBuilder;
 import org.alksndrstjc.request.RequestHandler;
 import org.alksndrstjc.request.concurrency.ExecutorsServiceFactory;
@@ -15,6 +16,7 @@ import org.alksndrstjc.utils.TextFileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -53,7 +55,7 @@ public class Main {
                 RequestHandler handler = new RequestHandler(executor, HttpClient.newBuilder().build());
                 for (String url : urls) {
                     handler.handleRequest(
-                            new RequestBuilder(url).buildRequest(),
+                            new RequestBuilder(url, null, new HttpMethod("GET", HttpRequest.BodyPublishers.noBody())).buildRequest(),
                             params.numberOfRequests,
                             params.numberOfThreads,
                             reportModel
