@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Install GraalVM Native prerequisites
         run: |
-          apt-get install build-essential libz-dev zlib1g-dev
+          sudo apt-get install build-essential libz-dev zlib1g-dev
 
       - name: Install GraalVM
         run: |
