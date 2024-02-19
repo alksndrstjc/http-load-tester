@@ -16,11 +16,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup GraalVM
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'graalvm'
-          java-version: 'java21'
+      - name: Download and extract GraalVM
+        run: |
+          wget https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
+          tar -xvf graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
 
       - name: Build with Maven
         run: mvn clean package
