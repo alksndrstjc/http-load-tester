@@ -1,0 +1,6 @@
+ccload -f urls.txt -n 100 -c 10
+
+-u http://localhost:8080/endpoint -n 1000 -c 10
+
+// parse the file items into correct urls
+// then iterate over lsit of urls and process

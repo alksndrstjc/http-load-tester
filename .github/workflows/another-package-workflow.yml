@@ -1,0 +1,39 @@
+name: Package Native Binary
+
+on:
+  push:
+    branches:
+      - master
+      - feature/package-action
+  pull_request:
+    branches:
+      - master
+      - feature/package-action
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up graalvm
+        uses: ayltai/setup-graalvm@v1
+        with:
+          java-version: 21
+          graalvm-version: 21.2.0
+          native-image: true
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Create Native Binary
+        run: |
+          native-image -jar ccload-jar-with-dependencies.jar
+
+      - name: Upload Binary to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: native-binary
+          path: ./ccload-jar-with-dependencies.jar
