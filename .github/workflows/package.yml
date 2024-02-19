@@ -24,9 +24,11 @@ jobs:
           wget -q https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
           tar -xzf graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
           export GRAALVM_HOME=$PWD/graalvm-jdk-21.0.2+13.1
+          echo $GRAALVM_HOME
           export PATH=$GRAALVM_HOME/bin:$PATH
+          echo $PATH
           export JAVA_HOME=$GRAALVM_HOME
-          java -version
+          echo $JAVA_HOME
 
       - name: Checkout Repository
         uses: actions/checkout@v2
