@@ -21,6 +21,9 @@ jobs:
           wget https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
           tar -xvf graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
 
+      - name: Setup GraalVm
+        run: export PATH=$PWD/graalvm-ce-21.0.2/bin:$PATH
+
       - name: Build with Maven
         run: mvn clean package
 
