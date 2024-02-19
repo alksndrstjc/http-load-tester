@@ -19,7 +19,7 @@ jobs:
         uses: ayltai/setup-graalvm@v1
         with:
           java-version: 21
-          graalvm-version: 21.2.0
+          graalvm-version: 21.0.2
           native-image: true
 
       - name: Checkout Repository
