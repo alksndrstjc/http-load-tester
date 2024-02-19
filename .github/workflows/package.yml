@@ -27,7 +27,7 @@ jobs:
       - name : Setup Java for Maven
         run: |
           echo "export JAVA_HOME=$GRAALVM_HOME" >> $GITHUB_ENV
-          echo "::add-path::$GRAALVM_HOME/bin"
+          echo "export PATH=$GRAALVM_HOME/bin:$PATH" >> $GITHUB_ENV
 
       - name: Build with Maven
         run: mvn clean package
