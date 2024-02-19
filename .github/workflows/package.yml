@@ -1,42 +1,34 @@
-name: Package Native Binary
+name: GraalVM Native Kurac
 
 on:
   push:
     branches:
-      - master
-  pull_request:
-    branches:
-      - master
+      - main
 
 jobs:
-  package:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Install GraalVM
+        run: |
+          wget -q https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
+          tar -xzf graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
+          export PATH=$PATH:$PWD/graalvm-ce-java11-21.0.2/bin
+
+      - name: Checkout Repository
         uses: actions/checkout@v2
-
-      - name: Download and extract GraalVM
-        run: |
-          wget https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
-          tar -xvf graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
-
-      - name: Setup GraalVm
-        run: export PATH=$PWD/graalvm-ce-21.0.2/bin:$PATH
-
-      - name : Setup Java for Maven
-        run: |
-          echo "export JAVA_HOME=$GRAALVM_HOME" >> $GITHUB_ENV
-          echo "export PATH=$GRAALVM_HOME/bin:$PATH" >> $GITHUB_ENV
 
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Package Native Image
-        run: native-image -jar target/ccload-jar-with-dependencies.jar ccload
+      - name: Create Native Binary
+        run: |
+          gu install native-image
+          native-image -jar ccload-jar-with-dependencies.jar
 
-      - name: Upload Artifact
+      - name: Upload Binary to Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ccload
-          path: ccload
+          name: native-binary
+          path: ./ccload-jar-with-dependencies.jar
