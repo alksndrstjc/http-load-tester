@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Display Maven version
+        run: mvn --version
+
       - name: Install GraalVM Native prerequisites
         run: |
           sudo apt-get install build-essential libz-dev zlib1g-dev
