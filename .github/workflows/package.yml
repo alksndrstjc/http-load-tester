@@ -1,0 +1,35 @@
+name: Package Native Binary
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup GraalVM
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'graalvm'
+          java-version: 'java21'
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Package Native Image
+        run: native-image -jar target/ccload-jar-with-dependencies.jar ccload
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ccload
+          path: ccload
