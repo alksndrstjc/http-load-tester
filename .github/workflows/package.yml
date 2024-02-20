@@ -33,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ccload_x86_64
-          path: ./ccload-jar-with-dependencies
+          path: ./ccload
