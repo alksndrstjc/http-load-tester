@@ -13,14 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install SDKMAN
+      - name: Install SDKMAN and graalvm java
         run: |
           curl -s "https://get.sdkman.io" | bash
           source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk help
-
-      - name: Install GraalVM with SDKMAN
-        run: |
           sdk install java 21.0.2-graal
 
       - name: Build with Maven
