@@ -28,7 +28,7 @@ jobs:
 
       - name: Create Native Image
         run: |
-          native-image -jar target/ccload-jar-with-dependencies.jar
+          $JAVA_HOME/bin/native-image -jar target/ccload-jar-with-dependencies.jar
 
       - name: Upload Native Binary
         uses: actions/upload-artifact@v2
