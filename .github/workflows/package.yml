@@ -11,10 +11,12 @@ jobs:
 
     steps:
       - name: Install SDKMAN
-        uses: sdkman/setup-sdkman@v1
-
-      - name: Install GraalVM with SDKMAN
-        run: sdk install java 21.0.2-graal
+        uses: sdkman/sdkman-action@v1
+        id: sdkman
+        with:
+          candidate: java
+          version: 21.0.2-graal
+      - run: java -version
 
       - name: Checkout code
         uses: actions/checkout@v2
