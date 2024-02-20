@@ -3,30 +3,31 @@ name: Build and Deploy Native Image
 on:
   push:
     branches:
-      - feature/package-action
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install SDKMAN
-        uses: sdkman/sdkman-action@v1
-        id: sdkman
-        with:
-          candidate: java
-          version: 21.0.2-graal
-      - run: java -version
-
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Install SDKMAN
+        run: |
+          curl -s "https://get.sdkman.io" | bash
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+      - name: Install GraalVM with SDKMAN
+        run: |
+          sdk install java 21.0.2-graal
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
       - name: Create Native Image
         run: |
-          native-image -jar ccload-jar-with-dependencies.jar
+          native-image -jar target/ccload-jar-with-dependencies.jar
 
       - name: Upload Native Binary
         uses: actions/upload-artifact@v2
