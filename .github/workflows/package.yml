@@ -3,7 +3,7 @@ name: Build and Deploy Native Image
 on:
   push:
     branches:
-      - main
+      - feature/package-action
 
 jobs:
   build-and-deploy:
