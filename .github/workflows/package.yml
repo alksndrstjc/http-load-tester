@@ -19,7 +19,6 @@ jobs:
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install java 21.0.2-graal
           echo "JAVA_HOME=$HOME/.sdkman/candidates/java/current" >> $GITHUB_ENV
-          gu install native-image
 
       - name: Build with Maven
         run: |
