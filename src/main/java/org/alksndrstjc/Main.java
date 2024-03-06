@@ -10,7 +10,6 @@ import org.alksndrstjc.request.HttpMethod;
 import org.alksndrstjc.request.RequestBuilder;
 import org.alksndrstjc.request.RequestHandler;
 import org.alksndrstjc.request.RequestThreadScheduler;
-import org.alksndrstjc.request.concurrency.ExecutorsServiceFactory;
 import org.alksndrstjc.request.concurrency.RPSThread;
 import org.alksndrstjc.utils.TextFileReader;
 
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -53,7 +53,8 @@ public class Main {
 
             // start concurrent execution of requests
             ReportModel reportModel = new ReportModel(params.numberOfRequests);
-            try (ExecutorService executor = new ExecutorsServiceFactory().createFixedThreadPool(params.numberOfThreads + 1)) {
+
+            try (ExecutorService executor = Executors.newFixedThreadPool(params.numberOfThreads + 1)) {
                 RequestThreadScheduler handler = new RequestThreadScheduler(executor);
                 for (String url : urls) {
                     handler.scheduleRequest(
