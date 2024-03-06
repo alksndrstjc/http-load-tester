@@ -1,5 +1,6 @@
 package org.alksndrstjc.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.alksndrstjc.model.RequestStats;
 
@@ -7,45 +8,44 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.http.HttpRequest;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
+@Getter
+@AllArgsConstructor
 public class RequestHandler {
 
-    @Getter
-    private final HttpRequest request;
+    private final String url;
+    private final List<String> headers;
+    private final HttpMethodName method;
     private final String body;
 
+    @AllArgsConstructor
     public static class RequiredData {
         public int code;
         public RequestStats requestStats;
         public long endTimeStamp;
-
-        public RequiredData(int code, RequestStats requestStats, long endTimeStamp) {
-            this.code = code;
-            this.requestStats = requestStats;
-            this.endTimeStamp = endTimeStamp;
-        }
-    }
-    public RequestHandler(HttpRequest request, String body) {
-        this.request = request;
-        this.body = body;
     }
 
     public RequiredData doRequest() {
         try {
-            HttpURLConnection connection = (HttpURLConnection) request.uri().toURL().openConnection();
+
+            HttpURLConnection connection = (HttpURLConnection) new URI(url).toURL().openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(2500);
             // set method
-            connection.setRequestMethod(request.method());
+            connection.setRequestMethod(method != null ? method.getValue() : HttpMethodName.GET.getValue());
             // set headers
-            Map<String, List<String>> headerMap = request.headers().map();
-            for (Map.Entry<String, List<String>> header : headerMap.entrySet()) {
-                connection.setRequestProperty(header.getKey(), String.join(",", header.getValue()));
+            if (headers != null) {
+                for (String header : headers) {
+                    String[] split = header.split(":");
+                    connection.setRequestProperty(split[0].trim(), split[1].trim());
+                }
             }
             // set body
-            if (!body.isEmpty()) {
+            if (body != null && !body.isEmpty()) {
                 connection.setDoOutput(true);
                 try (OutputStream outputStream = connection.getOutputStream()) {
                     outputStream.write(body.getBytes(StandardCharsets.UTF_8));
@@ -82,7 +82,7 @@ public class RequestHandler {
                     end
             );
 
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             return null;
         }
     }

@@ -21,7 +21,8 @@ public class RequestTask implements Runnable {
 
     @Override
     public void run() {
-        String url = handler.getRequest().uri().toString();
+
+        String url = handler.getUrl();
 
         for (int i = 0; i < numberOfRequests; i++) {
             try {

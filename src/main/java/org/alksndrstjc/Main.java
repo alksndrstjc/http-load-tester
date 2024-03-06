@@ -6,16 +6,12 @@ import org.alksndrstjc.commands.CLIParameters;
 import org.alksndrstjc.commands.CLIParser;
 import org.alksndrstjc.model.FinalReportModel;
 import org.alksndrstjc.model.ReportModel;
-import org.alksndrstjc.request.HttpMethod;
-import org.alksndrstjc.request.RequestBuilder;
 import org.alksndrstjc.request.RequestHandler;
 import org.alksndrstjc.request.RequestThreadScheduler;
 import org.alksndrstjc.request.concurrency.RPSThread;
 import org.alksndrstjc.utils.TextFileReader;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,9 +54,7 @@ public class Main {
                 RequestThreadScheduler handler = new RequestThreadScheduler(executor);
                 for (String url : urls) {
                     handler.scheduleRequest(
-                            new RequestHandler(
-                                    new RequestBuilder(url, null, new HttpMethod("GET", HttpRequest.BodyPublishers.noBody())).buildRequest(),
-                                    ""),
+                            new RequestHandler(url, params.headers, params.method, params.body),
                             params.numberOfRequests,
                             params.numberOfThreads,
                             reportModel
@@ -73,7 +67,7 @@ public class Main {
                 System.out.println(FinalReportModel.init(url, reportModel));
             }
 
-        } catch (ParameterException | URISyntaxException | IllegalArgumentException | IOException ex) {
+        } catch (ParameterException | IllegalArgumentException | IOException ex) {
             System.err.println(ex.getMessage());
             jc.usage();
         }
