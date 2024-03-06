@@ -1,6 +1,6 @@
 # HTTP Load Tester CLI
 
-### Idea for the project came from John Cricketts' Coding challenges.
+### Idea for the project came from John Crickett's Coding challenges.
 https://codingchallenges.fyi/
 
 This command-line interface (CLI) tool is designed to test the load of specified HTTP endpoints. 
@@ -12,7 +12,7 @@ You can parametrize
 - the number of requests to make, 
 - and the number of concurrent threads to use.
 
-The output consist of useful metrics in a following format: 
+The output consists of useful metrics in a following format: 
 ```Request URL: http://localhost:8080/endpoint3
 Total Requests (2XX): 100
 Failed Requests (5XX): 0
