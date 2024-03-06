@@ -9,21 +9,15 @@ import java.util.regex.Pattern;
 public class HttpHeaderValidator implements IValueValidator<List<String>> {
     @Override
     public void validate(String name, List<String> headers) throws ParameterException {
-        boolean shouldThrowAnException = headers.size() % 2 != 0;
-
         for (String header : headers) {
             if (!isValidHttpHeader(header)) {
-                shouldThrowAnException = true;
-                break;
+                throw new ParameterException("Not a valid header.");
             }
         }
-
-        if (shouldThrowAnException) throw new ParameterException("Not a valid header.");
-
     }
 
     public boolean isValidHttpHeader(String header) {
-        String pattern = "^[\\w-]+:\\s.*$";
+        String pattern = "^\\w+(?:-\\w+)*:\\s*.*$";
         return Pattern.matches(pattern, header);
     }
 }
