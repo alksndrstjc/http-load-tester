@@ -18,30 +18,33 @@ public class RequestStatsThreadSafe {
         }
     }
 
-    public static OptionalDouble getRequestedItemMin(String request, RequestedItem requestedItem) {
+    public static double getRequestedItemMin(String request, RequestedItem requestedItem) {
         Function<? super RequestStats, ? super Double> function = ruleMap.get(requestedItem);
         return perRequestStats.get(request)
                 .stream()
                 .map(function)
                 .mapToDouble(d -> (double) d)
-                .min();
+                .min()
+                .getAsDouble();
     }
 
-    public static OptionalDouble getRequestedItemMax(String request, RequestedItem requestedItem) {
+    public static double getRequestedItemMax(String request, RequestedItem requestedItem) {
         Function<? super RequestStats, ? super Double> function = ruleMap.get(requestedItem);
         return perRequestStats.get(request)
                 .stream()
                 .map(function)
                 .mapToDouble(d -> (double) d)
-                .max();
+                .max()
+                .getAsDouble();
     }
 
-    public static OptionalDouble getRequestedItemAvrg(String request, RequestedItem requestedItem) {
+    public static double getRequestedItemAvrg(String request, RequestedItem requestedItem) {
         Function<? super RequestStats, ? super Double> function = ruleMap.get(requestedItem);
         return perRequestStats.get(request)
                 .stream()
                 .map(function)
                 .mapToDouble(d -> (double) d)
-                .average();
+                .average()
+                .getAsDouble();
     }
 }

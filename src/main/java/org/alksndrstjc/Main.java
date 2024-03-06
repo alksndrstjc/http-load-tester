@@ -9,21 +9,23 @@ import org.alksndrstjc.model.ReportModel;
 import org.alksndrstjc.request.HttpMethod;
 import org.alksndrstjc.request.RequestBuilder;
 import org.alksndrstjc.request.RequestHandler;
+import org.alksndrstjc.request.RequestThreadScheduler;
 import org.alksndrstjc.request.concurrency.ExecutorsServiceFactory;
 import org.alksndrstjc.request.concurrency.RPSThread;
 import org.alksndrstjc.utils.TextFileReader;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class Main {
 
     public static void main(String[] args) {
+        System.out.println(Arrays.toString(args));
         CLIParser parser = CLIParser.getInstance();
         JCommander jc = parser.buildParser();
         try {
@@ -52,10 +54,12 @@ public class Main {
             // start concurrent execution of requests
             ReportModel reportModel = new ReportModel(params.numberOfRequests);
             try (ExecutorService executor = new ExecutorsServiceFactory().createFixedThreadPool(params.numberOfThreads + 1)) {
-                RequestHandler handler = new RequestHandler(executor, HttpClient.newBuilder().build());
+                RequestThreadScheduler handler = new RequestThreadScheduler(executor);
                 for (String url : urls) {
-                    handler.handleRequest(
-                            new RequestBuilder(url, null, new HttpMethod("GET", HttpRequest.BodyPublishers.noBody())).buildRequest(),
+                    handler.scheduleRequest(
+                            new RequestHandler(
+                                    new RequestBuilder(url, null, new HttpMethod("GET", HttpRequest.BodyPublishers.noBody())).buildRequest(),
+                                    ""),
                             params.numberOfRequests,
                             params.numberOfThreads,
                             reportModel

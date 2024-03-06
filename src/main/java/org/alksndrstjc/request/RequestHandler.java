@@ -1,57 +1,90 @@
 package org.alksndrstjc.request;
 
-import org.alksndrstjc.model.ReportModel;
-import org.alksndrstjc.request.concurrency.RequestTask;
+import lombok.Getter;
+import org.alksndrstjc.model.RequestStats;
 
-import java.net.http.HttpClient;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.http.HttpRequest;
-import java.util.concurrent.ExecutorService;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 public class RequestHandler {
 
-    private final ExecutorService executor;
-    private final HttpClient client;
+    @Getter
+    private final HttpRequest request;
+    private final String body;
 
+    public static class RequiredData {
+        public int code;
+        public RequestStats requestStats;
+        public long endTimeStamp;
 
-    public RequestHandler(ExecutorService executorService, HttpClient client) {
-        this.executor = executorService;
-        this.client = client;
+        public RequiredData(int code, RequestStats requestStats, long endTimeStamp) {
+            this.code = code;
+            this.requestStats = requestStats;
+            this.endTimeStamp = endTimeStamp;
+        }
+    }
+    public RequestHandler(HttpRequest request, String body) {
+        this.request = request;
+        this.body = body;
     }
 
-    public void handleRequest(HttpRequest request, int numberOfRequests, int numberOfThreads, ReportModel report) {
-        if (numberOfRequests < 0 || numberOfThreads < 0)
-            throw new IllegalArgumentException("Negative numOfRequests or numOfThreads.");
-
-        int batchSize = (int) Math.round((double) numberOfRequests / (double) numberOfThreads);
-
-        if (batchSize != 0) {
-            int remainingRequests = numberOfRequests - (batchSize * numberOfThreads);
-
-            //check if all requests can be processed in batches in fixed number of threads
-            if (remainingRequests == 0) {
-                for (int i = 1; i <= numberOfRequests; i += batchSize) {
-                    submit(batchSize, request, report);
-                }
-            } else {
-                // submit in batches until last thread
-                for (int i = 0; i < numberOfThreads - 1; i++) {
-                    submit(batchSize, request, report);
-                }
-                // reserve the last thread for remaining requests + batch size
-                submit(remainingRequests + batchSize, request, report);
+    public RequiredData doRequest() {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) request.uri().toURL().openConnection();
+            // set method
+            connection.setRequestMethod(request.method());
+            // set headers
+            Map<String, List<String>> headerMap = request.headers().map();
+            for (Map.Entry<String, List<String>> header : headerMap.entrySet()) {
+                connection.setRequestProperty(header.getKey(), String.join(",", header.getValue()));
             }
-        } else {
-            // check if there are requests which can be processed in a single thread
-            if (numberOfRequests != 0) submit(numberOfRequests, request, report);
+            // set body
+            if (!body.isEmpty()) {
+                connection.setDoOutput(true);
+                try (OutputStream outputStream = connection.getOutputStream()) {
+                    outputStream.write(body.getBytes(StandardCharsets.UTF_8));
+                }
+            }
+
+            long start = System.currentTimeMillis();
+            long timeToFirstByte = 0;
+            long timeToLastByte;
+
+            try (InputStream inputStream = connection.getInputStream()) {
+                boolean isFirstByte = true;
+
+                while (inputStream.read() != -1) {
+                    if (isFirstByte) {
+                        isFirstByte = false;
+                        timeToFirstByte = System.currentTimeMillis();
+                    }
+                }
+                timeToLastByte = System.currentTimeMillis();
+            }
+            connection.getResponseCode();
+            connection.disconnect();
+
+            long end = System.currentTimeMillis();
+
+            return new RequiredData(
+                    connection.getResponseCode(),
+                    new RequestStats(
+                            (double) (end - start) / 1000,
+                            (double) (timeToFirstByte - start) / 1000,
+                            (double) (timeToLastByte - start) / 1000
+                    ),
+                    end
+            );
+
+        } catch (IOException e) {
+            return null;
         }
     }
 
-    private void submit(int requestsNum, HttpRequest request, ReportModel report) {
-        executor.submit(new RequestTask(
-                client,
-                requestsNum,
-                request,
-                report
-        ));
-    }
 }
